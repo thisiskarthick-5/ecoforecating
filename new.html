@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoForecast - Environmental Forecasting Platform</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4A90E2',secondary:'#50C878'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body { font-family: 'Inter', sans-serif; }
+.gradient-bg { background: linear-gradient(135deg, rgba(74, 144, 226, 0.1) 0%, rgba(80, 200, 120, 0.1) 100%); }
+.hero-bg { background: linear-gradient(135deg, #4A90E2 0%, #50C878 100%); }
+.card-hover { transition: all 0.3s ease; }
+.card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.float-animation { animation: float 6s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+.fade-in { animation: fadeIn 1s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.nav-item { position: relative; transition: all 0.3s ease; }
+.nav-item::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #4A90E2; transition: width 0.3s ease; }
+.nav-item:hover::after { width: 100%; }
+.pulse-dot { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.loading-spinner { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body class="bg-gray-50">
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-16">
+<div class="flex items-center">
+<div class="font-['Pacifico'] text-2xl text-primary">EcoForecast</div>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a href="#weather" class="nav-item flex items-center space-x-2 text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-sun-line"></i>
+</div>
+<span>Weather Forecasting</span>
+</a>
+<a href="#flood" class="nav-item flex items-center space-x-2 text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-flood-line"></i>
+</div>
+<span>Flood Forecasting</span>
+</a>
+<a href="#rain" class="nav-item flex items-center space-x-2 text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-rainy-line"></i>
+</div>
+<span>Rain Forecasting</span>
+</a>
+<a href="#temperature" class="nav-item flex items-center space-x-2 text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-temp-hot-line"></i>
+</div>
+<span>Temperature</span>
+</a>
+<a href="#aqi" class="nav-item flex items-center space-x-2 text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-leaf-line"></i>
+</div>
+<span>Air Quality Index</span>
+</a>
+</div>
+<div class="md:hidden">
+<button id="mobile-menu-btn" class="text-gray-700 hover:text-primary">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-menu-line ri-lg"></i>
+</div>
+</button>
+</div>
+</div>
+</div>
+<div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a href="#weather" class="flex items-center space-x-3 text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-sun-line"></i>
+</div>
+<span>Weather Forecasting</span>
+</a>
+<a href="#flood" class="flex items-center space-x-3 text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-flood-line"></i>
+</div>
+<span>Flood Forecasting</span>
+</a>
+<a href="#rain" class="flex items-center space-x-3 text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-rainy-line"></i>
+</div>
+<span>Rain Forecasting</span>
+</a>
+<a href="#temperature" class="flex items-center space-x-3 text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-temp-hot-line"></i>
+</div>
+<span>Temperature</span>
+</a>
+<a href="#aqi" class="flex items-center space-x-3 text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-leaf-line"></i>
+</div>
+<span>Air Quality Index</span>
+</a>
+</div>
+</div>
+</nav>
+<section class="relative overflow-hidden min-h-screen flex items-center bg-gradient-to-br from-primary/5 via-white to-secondary/5">
+<div class="absolute inset-0 bg-[url('https://readdy.ai/api/search-image?query=Modern%20minimalist%20environmental%20monitoring%20dashboard%20interface%20with%20clean%20design%2C%20soft%20blue%20and%20green%20gradient%20background%2C%20professional%20UI%20elements%2C%20weather%20icons%20and%20data%20visualization%2C%20high-end%20tech%20aesthetic&width=1920&height=1080&seq=hero002&orientation=landscape')] bg-cover bg-center opacity-20"></div>
+<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="fade-in">
+<h1 class="text-5xl lg:text-7xl font-bold mb-8 leading-tight text-gray-900">
+Environmental <span class="text-primary">Intelligence</span> Platform
+</h1>
+<p class="text-xl lg:text-2xl mb-12 text-gray-600 leading-relaxed max-w-2xl">
+A smart platform for real-time environmental forecasts to help communities stay safe and informed.
+</p>
+<div class="flex flex-col sm:flex-row gap-6">
+<button class="bg-primary text-white px-8 py-4 !rounded-button font-semibold hover:bg-primary/90 transition-all duration-300 whitespace-nowrap shadow-lg shadow-primary/20 flex items-center gap-2">
+<span>Get Started</span>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-right-line"></i>
+</div>
+</button>
+<button class="bg-white text-gray-800 px-8 py-4 !rounded-button font-semibold hover:bg-gray-50 transition-all duration-300 whitespace-nowrap shadow-lg flex items-center gap-2">
+<span>Watch Demo</span>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-play-circle-line"></i>
+</div>
+</button>
+</div>
+<div class="mt-12 flex items-center gap-8">
+<div class="flex -space-x-4">
+<img class="w-12 h-12 rounded-full border-4 border-white" src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20business%20person%20with%20confident%20smile%2C%20high%20quality%20studio%20lighting&width=100&height=100&seq=user1&orientation=squarish" alt="User">
+<img class="w-12 h-12 rounded-full border-4 border-white" src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle%20aged%20business%20woman%20with%20warm%20smile%2C%20high%20quality%20studio%20lighting&width=100&height=100&seq=user2&orientation=squarish" alt="User">
+<img class="w-12 h-12 rounded-full border-4 border-white" src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20senior%20business%20executive%20with%20trustworthy%20expression%2C%20high%20quality%20studio%20lighting&width=100&height=100&seq=user3&orientation=squarish" alt="User">
+</div>
+<div class="text-gray-600">
+<div class="font-semibold">Trusted by 10,000+ users</div>
+<div class="text-sm">across 50+ countries</div>
+</div>
+</div>
+</div>
+<div class="hidden lg:block relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full animate-pulse"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-secondary/5 rounded-full animate-pulse delay-300"></div>
+<div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-lg mx-auto">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 bg-red-500 rounded-full"></div>
+<div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+<div class="w-3 h-3 bg-green-500 rounded-full"></div>
+</div>
+<div class="text-sm text-gray-500">Live Data</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-primary">
+<i class="ri-temp-hot-line ri-lg"></i>
+</div>
+<div>
+<div class="font-semibold">Temperature</div>
+<div class="text-sm text-gray-500">Real-time monitoring</div>
+</div>
+</div>
+<div class="text-2xl font-bold text-gray-900">24°C</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-secondary">
+<i class="ri-leaf-line ri-lg"></i>
+</div>
+<div>
+<div class="font-semibold">Air Quality</div>
+<div class="text-sm text-gray-500">Current AQI</div>
+</div>
+</div>
+<div class="text-2xl font-bold text-gray-900">42</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-gray-400 animate-bounce">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-arrow-down-line ri-lg"></i>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in">
+<h2 class="text-4xl font-bold text-gray-900 mb-4">Live Environmental Data</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+Monitor real-time environmental conditions with our comprehensive forecasting system designed to keep you informed and prepared.
+</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div id="weather" class="bg-white rounded-2xl shadow-lg p-8 card-hover border border-gray-100">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-sun-line ri-lg"></i>
+</div>
+</div>
+<div class="pulse-dot w-3 h-3 bg-green-500 rounded-full"></div>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Weather Forecast</h3>
+<p class="text-gray-600 mb-6">Comprehensive weather predictions including precipitation, wind speed, and atmospheric pressure.</p>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Current Condition</span>
+<span class="font-semibold text-gray-900">Partly Cloudy</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Visibility</span>
+<span class="font-semibold text-gray-900">10 km</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Wind Speed</span>
+<span class="font-semibold text-gray-900">15 km/h</span>
+</div>
+</div>
+<button onclick="window.location.href='weather.html'" class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
+View Details
+</button>
+</div>
+<div id="flood" class="bg-white rounded-2xl shadow-lg p-8 card-hover border border-gray-100">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-flood-line ri-lg"></i>
+</div>
+</div>
+<div class="pulse-dot w-3 h-3 bg-yellow-500 rounded-full"></div>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Flood Monitoring</h3>
+<p class="text-gray-600 mb-6">Real-time flood risk assessment and water level monitoring for early warning systems.</p>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Risk Level</span>
+<span class="font-semibold text-yellow-600">Moderate</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Water Level</span>
+<span class="font-semibold text-gray-900">2.3 m</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Alert Status</span>
+<span class="font-semibold text-gray-900">Monitoring</span>
+</div>
+</div>
+<button onclick="window.location.href='weather.html'"  class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
+View Details
+</button>
+</div>
+<div id="rain" class="bg-white rounded-2xl shadow-lg p-8 card-hover border border-gray-100">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-rainy-line ri-lg"></i>
+</div>
+</div>
+<div class="pulse-dot w-3 h-3 bg-blue-500 rounded-full"></div>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Rainfall Prediction</h3>
+<p class="text-gray-600 mb-6">Accurate precipitation forecasts with hourly and daily rainfall intensity predictions.</p>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Today's Total</span>
+<span class="font-semibold text-gray-900">12.5 mm</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Next Hour</span>
+<span class="font-semibold text-gray-900">Light Rain</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Probability</span>
+<span class="font-semibold text-gray-900">75%</span>
+</div>
+</div>
+<button   onclick="window.location.href='weather.html'" class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
+View Details
+</button>
+</div>
+<div id="temperature" class="bg-white rounded-2xl shadow-lg p-8 card-hover border border-gray-100">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center text-orange-500">
+<i class="ri-temp-hot-line ri-lg"></i>
+</div>
+</div>
+<div class="pulse-dot w-3 h-3 bg-green-500 rounded-full"></div>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Temperature Trends</h3>
+<p class="text-gray-600 mb-6">Detailed temperature analysis with heat index and thermal comfort predictions.</p>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Current</span>
+<span class="font-semibold text-gray-900">24°C</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Feels Like</span>
+<span class="font-semibold text-gray-900">26°C</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-gray-500">Daily Range</span>
+<span class="font-semibold text-gray-900">18°C - 28°C</span>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
+View Details
+</button>
+</div>
+<div id="aqi" class="bg-white rounded-2xl shadow-lg p-8 card-hover border border-gray-100 md:col-span-2 lg:col-span-2">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center text-secondary">
+<i class="ri-leaf-line ri-lg"></i>
+</div>
+</div>
+<div class="pulse-dot w-3 h-3 bg-green-500 rounded-full"></div>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Air Quality Index</h3>
+<p class="text-gray-600 mb-6">Comprehensive air quality monitoring including PM2.5, PM10, ozone, and other pollutants.</p>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="text-center">
+<div class="text-2xl font-bold text-green-600">42</div>
+<div class="text-sm text-gray-500">AQI Score</div>
+<div class="text-xs text-green-600">Good</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-gray-900">15</div>
+<div class="text-sm text-gray-500">PM2.5</div>
+<div class="text-xs text-green-600">Low</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-gray-900">28</div>
+<div class="text-sm text-gray-500">PM10</div>
+<div class="text-xs text-green-600">Low</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-gray-900">65</div>
+<div class="text-sm text-gray-500">Ozone</div>
+<div class="text-xs text-yellow-600">Moderate</div>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-3 !rounded-button font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
+View Detailed Analysis
+</button>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 gradient-bg">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold text-gray-900 mb-4">Data Visualization</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+Interactive charts and graphs providing detailed insights into environmental trends and patterns.
+</p>
+</div>
+<div class="bg-white rounded-2xl shadow-xl p-8">
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+<button id="temp-tab" class="tab-btn bg-primary text-white px-6 py-3 !rounded-button font-semibold whitespace-nowrap">
+Temperature Trends
+</button>
+<button id="rain-tab" class="tab-btn bg-gray-200 text-gray-700 px-6 py-3 !rounded-button font-semibold hover:bg-gray-300 whitespace-nowrap">
+Rainfall Data
+</button>
+<button id="aqi-tab" class="tab-btn bg-gray-200 text-gray-700 px-6 py-3 !rounded-button font-semibold hover:bg-gray-300 whitespace-nowrap">
+Air Quality
+</button>
+</div>
+<div id="chart-container" class="h-96 w-full"></div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold text-gray-900 mb-4">Live Updates</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+Stay informed with real-time environmental data updates and alerts.
+</p>
+</div>
+<div class="bg-gray-50 rounded-2xl p-8">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-2xl font-bold text-gray-900">Real-time Data Feed</h3>
+<div class="flex items-center space-x-2 text-sm text-gray-500">
+<div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+<span>Last updated: <span id="last-update">2 minutes ago</span></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-white rounded-xl p-6 text-center">
+<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-temp-hot-line"></i>
+</div>
+</div>
+<div class="text-3xl font-bold text-gray-900 mb-2">24°C</div>
+<div class="text-sm text-gray-500">Temperature</div>
+<div class="text-xs text-green-600 mt-1">↑ 2°C from yesterday</div>
+</div>
+<div class="bg-white rounded-xl p-6 text-center">
+<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-drop-line"></i>
+</div>
+</div>
+<div class="text-3xl font-bold text-gray-900 mb-2">68%</div>
+<div class="text-sm text-gray-500">Humidity</div>
+<div class="text-xs text-blue-600 mt-1">↑ 5% from yesterday</div>
+</div>
+<div class="bg-white rounded-xl p-6 text-center">
+<div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+<div class="w-6 h-6 flex items-center justify-center text-secondary">
+<i class="ri-leaf-line"></i>
+</div>
+</div>
+<div class="text-3xl font-bold text-gray-900 mb-2">42</div>
+<div class="text-sm text-gray-500">AQI</div>
+<div class="text-xs text-green-600 mt-1">Good Quality</div>
+</div>
+<div class="bg-white rounded-xl p-6 text-center">
+<div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+<div class="w-6 h-6 flex items-center justify-center text-yellow-600">
+<i class="ri-flashlight-line"></i>
+</div>
+</div>
+<div class="text-3xl font-bold text-gray-900 mb-2">1013</div>
+<div class="text-sm text-gray-500">Pressure (hPa)</div>
+<div class="text-xs text-gray-600 mt-1">Stable</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-gray-900 text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<div>
+<div class="font-['Pacifico'] text-2xl text-primary mb-4">EcoForecast</div>
+<p class="text-gray-400 mb-6">
+Empowering communities with accurate environmental forecasting and real-time data to make informed decisions for a safer future.
+</p>
+<div class="flex space-x-4">
+<a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-twitter-line"></i>
+</div>
+</a>
+<a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-facebook-line"></i>
+</div>
+</a>
+<a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-linkedin-line"></i>
+</div>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-6">Quick Links</h3>
+<ul class="space-y-3">
+<li><a href="#weather" class="text-gray-400 hover:text-white transition-colors">Weather Forecasting</a></li>
+<li><a href="#flood" class="text-gray-400 hover:text-white transition-colors">Flood Monitoring</a></li>
+<li><a href="#rain" class="text-gray-400 hover:text-white transition-colors">Rain Prediction</a></li>
+<li><a href="#temperature" class="text-gray-400 hover:text-white transition-colors">Temperature Analysis</a></li>
+<li><a href="#aqi" class="text-gray-400 hover:text-white transition-colors">Air Quality Index</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-6">Contact Information</h3>
+<div class="space-y-4">
+<div class="flex items-center space-x-3">
+<div class="w-5 h-5 flex items-center justify-center text-primary">
+<i class="ri-mail-line"></i>
+</div>
+<span class="text-gray-400">contact@ecoforecast.com</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-5 h-5 flex items-center justify-center text-primary">
+<i class="ri-phone-line"></i>
+</div>
+<span class="text-gray-400">+1 (555) 123-4567</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-5 h-5 flex items-center justify-center text-primary">
+<i class="ri-map-pin-line"></i>
+</div>
+<span class="text-gray-400">123 Environmental Way, Green City, EC 12345</span>
+</div>
+</div>
+<div class="mt-8">
+<h4 class="text-lg font-semibold mb-4">Newsletter Signup</h4>
+<div class="flex">
+<input type="email" placeholder="Enter your email" class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 !rounded-button text-white placeholder-gray-400 focus:outline-none focus:border-primary">
+<button class="bg-primary text-white px-6 py-2 !rounded-button ml-2 hover:bg-blue-600 transition-colors whitespace-nowrap">
+Subscribe
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-gray-800 mt-12 pt-8 text-center">
+<p class="text-gray-400">
+© 2025 EcoForecast. All rights reserved. | Data sources: National Weather Service, Environmental Protection Agency
+</p>
+</div>
+</div>
+</footer>
+<script id="mobile-menu-toggle">
+document.addEventListener('DOMContentLoaded', function() {
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+mobileMenuBtn.addEventListener('click', function() {
+mobileMenu.classList.toggle('hidden');
+});
+});
+</script>
+<script id="chart-functionality">
+document.addEventListener('DOMContentLoaded', function() {
+const chartContainer = document.getElementById('chart-container');
+const chart = echarts.init(chartContainer);
+const tempData = {
+animation: false,
+grid: { top: 0, right: 0, bottom: 0, left: 0 },
+xAxis: {
+type: 'category',
+data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+axisLine: { lineStyle: { color: '#e5e7eb' } },
+axisTick: { show: false },
+axisLabel: { color: '#6b7280' }
+},
+yAxis: {
+type: 'value',
+axisLine: { show: false },
+axisTick: { show: false },
+axisLabel: { color: '#6b7280' },
+splitLine: { lineStyle: { color: '#f3f4f6' } }
+},
+series: [{
+data: [22, 24, 26, 25, 23, 21, 20],
+type: 'line',
+smooth: true,
+symbol: 'none',
+lineStyle: { color: 'rgba(74, 144, 226, 1)', width: 3 },
+areaStyle: {
+color: {
+type: 'linear',
+x: 0, y: 0, x2: 0, y2: 1,
+colorStops: [
+{ offset: 0, color: 'rgba(74, 144, 226, 0.1)' },
+{ offset: 1, color: 'rgba(74, 144, 226, 0.01)' }
+]
+}
+}
+}],
+tooltip: {
+trigger: 'axis',
+backgroundColor: 'rgba(255, 255, 255, 0.95)',
+borderColor: '#e5e7eb',
+textStyle: { color: '#1f2937' }
+}
+};
+const rainData = {
+animation: false,
+grid: { top: 0, right: 0, bottom: 0, left: 0 },
+xAxis: {
+type: 'category',
+data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+axisLine: { lineStyle: { color: '#e5e7eb' } },
+axisTick: { show: false },
+axisLabel: { color: '#6b7280' }
+},
+yAxis: {
+type: 'value',
+axisLine: { show: false },
+axisTick: { show: false },
+axisLabel: { color: '#6b7280' },
+splitLine: { lineStyle: { color: '#f3f4f6' } }
+},
+series: [{
+data: [5, 12, 8, 15, 3, 7, 10],
+type: 'bar',
+itemStyle: {
+color: 'rgba(141, 211, 199, 1)',
+borderRadius: [4, 4, 0, 0]
+}
+}],
+tooltip: {
+trigger: 'axis',
+backgroundColor: 'rgba(255, 255, 255, 0.95)',
+borderColor: '#e5e7eb',
+textStyle: { color: '#1f2937' }
+}
+};
+const aqiData = {
+animation: false,
+series: [{
+type: 'gauge',
+center: ['50%', '60%'],
+startAngle: 200,
+endAngle: -20,
+min: 0,
+max: 300,
+splitNumber: 6,
+itemStyle: { color: 'rgba(80, 200, 120, 1)' },
+progress: { show: true, width: 30 },
+pointer: { show: false },
+axisLine: { lineStyle: { width: 30 } },
+axisTick: { show: false },
+splitLine: { show: false },
+axisLabel: { show: false },
+detail: {
+valueAnimation: true,
+formatter: '{value}',
+color: '#1f2937',
+fontSize: 40,
+offsetCenter: [0, '-20%']
+},
+data: [{ value: 42, name: 'AQI' }]
+}]
+};
+chart.setOption(tempData);
+document.getElementById('temp-tab').addEventListener('click', function() {
+chart.setOption(tempData);
+updateTabState('temp-tab');
+});
+document.getElementById('rain-tab').addEventListener('click', function() {
+chart.setOption(rainData);
+updateTabState('rain-tab');
+});
+document.getElementById('aqi-tab').addEventListener('click', function() {
+chart.setOption(aqiData);
+updateTabState('aqi-tab');
+});
+function updateTabState(activeTab) {
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.classList.remove('bg-primary', 'text-white');
+btn.classList.add('bg-gray-200', 'text-gray-700');
+});
+document.getElementById(activeTab).classList.remove('bg-gray-200', 'text-gray-700');
+document.getElementById(activeTab).classList.add('bg-primary', 'text-white');
+}
+window.addEventListener('resize', function() {
+chart.resize();
+});
+});
+</script>
+<script id="live-updates">
+document.addEventListener('DOMContentLoaded', function() {
+function updateTimestamp() {
+const now = new Date();
+const minutes = Math.floor(Math.random() * 5) + 1;
+document.getElementById('last-update').textContent = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+}
+updateTimestamp();
+setInterval(updateTimestamp, 60000);
+});
+</script>
+<script id="smooth-scrolling">
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function (e) {
+e.preventDefault();
+const target = document.querySelector(this.getAttribute('href'));
+if (target) {
+target.scrollIntoView({
+behavior: 'smooth',
+block: 'start'
+});
+}
+});
+});
+});
+</script>
+</body>
+</html>
